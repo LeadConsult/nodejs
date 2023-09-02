@@ -5,12 +5,17 @@
   "main": "app.js",
   "scripts": {
     "start": "node app.js",
-    "start": "http-server -p 3000"
+    "start-http": "http-server -p 3000"
   },
   "author": "Your Name",
   "license": "MIT",
   "dependencies": {
-    "puppeteer": "^21.1.0",
     "express": "^4.17.1"
+  },
+  "devDependencies": {
+    "puppeteer": "^21.1.0"
+  },
+  "puppeteer": {
+    "chromium_revision": "999999"
   }
 }
