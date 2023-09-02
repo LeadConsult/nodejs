@@ -15,8 +15,5 @@
   },
   "devDependencies": {
     "puppeteer": "^21.1.0"
-  },
-  "puppeteer": {
-    "chromium_revision": "999999"
   }
 }
