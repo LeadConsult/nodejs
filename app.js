@@ -104,11 +104,18 @@ const htmlPage = `<!DOCTYPE html>
                     let formattedDataArray = [];
                     let formattedDataArray2 = [];
 
-                    data.forEach(innerArray => {
-                        // Convert tweet counts to integers
-                        innerArray.forEach(item => {
-                            item.tweetCount = parseInt(item.tweetCount);
-                        });
+                    // Check if innerArray is an array before attempting to iterate through it
+                    if (Array.isArray(innerArray)) {
+                      innerArray.forEach(item => {
+                        // Check if item is an object with a tweetCount property
+                        if (typeof item === 'object' && 'tweetCount' in item) {
+                          item.tweetCount = parseInt(item.tweetCount);
+                        }
+                      });
+                    } else {
+                      console.error('innerArray is not an array.');
+                    }
+
 
                         // Sort the inner array by tweet count in descending order
                         innerArray.sort((a, b) => b.tweetCount - a.tweetCount);
