@@ -9,39 +9,38 @@ const server = http.createServer(async (req, res) => {
     } else if (req.url === '/scrape') {
         // Scrape data when the /scrape route is requested
         try {
+            // Launch Puppeteer and open a new page
             const browser = await puppeteer.launch();
             const page = await browser.newPage();
+
+            // Navigate to the webpage you want to scrape
             await page.goto('https://trends24.in/nigeria/');
 
             // Scrape data here...
             const scrapedData = await page.evaluate(() => {
                 const trendElements = document.querySelectorAll('.trend-card');
                 const trendList = [];
-            
+
                 trendElements.forEach(trendElement => {
                     const olElement = trendElement.querySelector('ol.trend-card__list');
                     const trendItems = olElement.querySelectorAll('li');
-            
-                    const trendInfo = [];
-            
+
                     trendItems.forEach(trendItem => {
                         const anchorElement = trendItem.querySelector('a');
                         const tweetCountElement = trendItem.querySelector('span.tweet-count');
-            
+
                         if (anchorElement && tweetCountElement) {
                             const trendText = anchorElement.textContent;
                             const tweetCount = tweetCountElement.textContent;
-                            trendInfo.push({ trendText, tweetCount });
+                            trendList.push({ trendText, tweetCount });
                         }
                     });
-            
-                    trendList.push(trendInfo);
                 });
-            
+
                 return trendList;
             });
-            
 
+            // Close the Puppeteer browser
             await browser.close();
 
             // Send the scraped data as a JSON response
