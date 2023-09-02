@@ -9,7 +9,6 @@
   "author": "Your Name",
   "license": "MIT",
   "dependencies": {
-    "express": "^5.0.0", // Replace with the version you need
-    // Add other dependencies here
+    "express": "^5.0.0"
   }
 }
