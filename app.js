@@ -1,44 +1,67 @@
-const puppeteer = require('puppeteer-core');
-const fs = require('fs');
-const path = require('path');
+const http = require('http');
+const puppeteer = require('puppeteer');
 
-// List of common installation paths for Chrome or Chromium on Linux
-const possiblePaths = [
-    '/usr/bin/chromium-browser', // Example path, add more if needed
-    '/usr/bin/google-chrome',    // Example path, add more if needed
-    // Add more paths here
-];
+const server = http.createServer(async (req, res) => {
+    if (req.url === '/') {
+        // Serve the HTML page
+        res.writeHead(200, { 'Content-Type': 'text/html' });
+        res.end(htmlPage);
+    } else if (req.url === '/scrape') {
+        // Scrape data when the /scrape route is requested
+        try {
+            // Launch Puppeteer and open a new page
+            const browser = await puppeteer.launch();
+            const page = await browser.newPage();
 
-async function findChromeExecutable() {
-    for (const possiblePath of possiblePaths) {
-        if (fs.existsSync(possiblePath)) {
-            return possiblePath;
+            // Navigate to the webpage you want to scrape
+            await page.goto('https://trends24.in/nigeria/');
+
+            // Scrape data here...
+            const scrapedData = await page.evaluate(() => {
+                const trendElements = document.querySelectorAll('.trend-card');
+                const trendList = [];
+
+                trendElements.forEach(trendElement => {
+                    const olElement = trendElement.querySelector('ol.trend-card__list');
+                    const trendItems = olElement.querySelectorAll('li');
+
+                    trendItems.forEach(trendItem => {
+                        const anchorElement = trendItem.querySelector('a');
+                        const tweetCountElement = trendItem.querySelector('span.tweet-count');
+
+                        if (anchorElement && tweetCountElement) {
+                            const trendText = anchorElement.textContent;
+                            const tweetCount = tweetCountElement.textContent;
+                            trendList.push({ trendText, tweetCount });
+                        }
+                    });
+                });
+
+                return trendList;
+            });
+
+            // Close the Puppeteer browser
+            await browser.close();
+
+            // Send the scraped data as a JSON response
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify(scrapedData, null, 2));
+        } catch (error) {
+            // Handle errors and send an error response
+            console.error(error);
+            res.writeHead(500, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ error: 'Error scraping data' }));
         }
-    }
-    return null;
-}
-
-async function main() {
-    const chromeExecutablePath = await findChromeExecutable();
-
-    if (chromeExecutablePath) {
-        console.log(`Found Chrome executable at: ${chromeExecutablePath}`);
-
-        const browser = await puppeteer.launch({
-            executablePath: chromeExecutablePath,
-            headless: true, // Set this as needed
-        });
-
-        const page = await browser.newPage();
-        // Your scraping code here
-
-        await browser.close();
     } else {
-        console.error('Chrome executable not found.');
+        // Handle other routes if needed
+        res.writeHead(404, { 'Content-Type': 'text/plain' });
+        res.end('Not Found');
     }
-}
+});
 
-main();
+server.listen(3000, () => {
+    console.log('Server is running on port 3000');
+});
 
 
 const htmlPage = `<!DOCTYPE html>
