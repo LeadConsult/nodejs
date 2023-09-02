@@ -1,3 +1,45 @@
+const puppeteer = require('puppeteer-core');
+const fs = require('fs');
+const path = require('path');
+
+// List of common installation paths for Chrome or Chromium on Linux
+const possiblePaths = [
+    '/usr/bin/chromium-browser', // Example path, add more if needed
+    '/usr/bin/google-chrome',    // Example path, add more if needed
+    // Add more paths here
+];
+
+async function findChromeExecutable() {
+    for (const possiblePath of possiblePaths) {
+        if (fs.existsSync(possiblePath)) {
+            return possiblePath;
+        }
+    }
+    return null;
+}
+
+async function main() {
+    const chromeExecutablePath = await findChromeExecutable();
+
+    if (chromeExecutablePath) {
+        console.log(`Found Chrome executable at: ${chromeExecutablePath}`);
+
+        const browser = await puppeteer.launch({
+            executablePath: chromeExecutablePath,
+            headless: true, // Set this as needed
+        });
+
+        const page = await browser.newPage();
+        // Your scraping code here
+
+        await browser.close();
+    } else {
+        console.error('Chrome executable not found.');
+    }
+}
+
+main();
+
 const http = require('http');
 const puppeteer = require('puppeteer');
 
