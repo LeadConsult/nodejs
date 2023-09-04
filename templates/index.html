@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Web Scraping with Flask</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+
+</head>
+<body>
+    <h1>Web Scraping with Flask</h1>
+    <button id="scrapeButton">Scrape Data</button>
+    <div class="container">
+      <div class="row">
+          <div class="col-md-6">
+              <div id="result"></div>
+          </div>
+          <div class="col-md-6">
+              <div id="result2" style="color: red"></div>
+          </div>
+      </div>
+  </div>
+  
+
+
+
+    <script>
+        document.getElementById("scrapeButton").addEventListener("click", function() {
+          document.getElementById("result").innerText = 'Fetching...';
+            fetch('/scrape', {
+                method: 'POST'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    document.getElementById("result").innerText = 'Error: ' + data.error;
+                } else {
+                    // Process and display scraped data here
+                    // document.getElementById("result").innerText = JSON.stringify(data, null, 2);
+                    //console.log(JSON.stringify(data, null, 2));
+
+                    //else { -->
+                      // Sort the data by tweet count in descending order
+                      // Sort the data array by tweetCount in descending order
+data.sort((a, b) => {
+  const tweetCountA = parseInt(a.tweetCount);
+  const tweetCountB = parseInt(b.tweetCount);
+  return tweetCountB - tweetCountA;
+});
+
+// Initialize an object to track unique trendText values
+const uniqueTrendText = {};
+
+// Filter and deduplicate the data array
+const deduplicatedData = data.filter(item => {
+  // Check if the trendText is not already in the uniqueTrendText object
+  if (!uniqueTrendText[item.trendText]) {
+      uniqueTrendText[item.trendText] = true; // Mark trendText as seen
+      return true; // Include this item in the deduplicated array
+  }
+  return false; // Exclude this item as it's a duplicate
+});
+
+// Now, deduplicatedData contains sorted unique items based on trendText
+console.log(deduplicatedData);
+
+
+                      // Format and display the sorted data
+                      const formattedData = data
+                        .map(function(item) {
+                          return item.trendText + ", " + item.tweetCount;
+                        })
+                        .join('<br>');
+                      
+                      //document.getElementById("result").innerHTML = formattedData;
+
+                      // Initialize arrays to store formatted data
+const formattedDataArray = [];
+const formattedDataArray2 = [];
+
+// Format the deduplicatedData
+deduplicatedData.forEach(item => {
+    formattedDataArray.push(`${item.trendText} ${item.tweetCount}K`);
+    formattedDataArray2.push(item.trendText);
+});
+
+// Join the formatted data with line breaks
+const formattedDataString = formattedDataArray.join('<br>');
+const formattedDataString2 = formattedDataArray2.join('<br>');
+
+// Display the sorted, deduplicated data in the browser
+document.getElementById("result").innerHTML = formattedDataString;
+document.getElementById("result2").innerHTML = formattedDataString2;
+                  }
+              })
+            .catch(error => {
+                document.getElementById("result").innerText = 'Fetch error: ' + error.message;
+            });
+        });
+    </script>
+</body>
+</html>
